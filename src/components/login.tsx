@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, Link } from 'react-router-dom';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Container, Box, Typography, TextField, Button, CircularProgress } from '@mui/material';
+import { Container, Box, Typography, TextField, Button, CircularProgress, Grid, Card, CardContent, Avatar, Divider } from '@mui/material';
 import { io, Socket } from 'socket.io-client';
+import BranchIcon from './icons';
+import BranchDetails from './branchDetails';
 
 const theme = createTheme();
 
@@ -27,8 +29,8 @@ const LoginPage: React.FC<LoginPageProps> = () => {
       });
       const data = await response.json();
       if (response.ok) {
-        localStorage.setItem('token', data.access_token);
-        console.log(data.access_token);
+        localStorage.setItem('token', data.token);
+        console.log(data.token);
         window.location.href = '/rooms';
       } else {
         setError(data.message);
@@ -117,7 +119,7 @@ const RoomsPage: React.FC<RoomsPageProps> = () => {
       const token = localStorage.getItem('token');
       const newSocket = io('http://localhost:3000', {
         extraHeaders: {
-          Authorization: `${token}`,
+          authorization: `${token}`,
         },
       });
       setSocket(newSocket);
@@ -171,9 +173,10 @@ const RoomsPage: React.FC<RoomsPageProps> = () => {
       </Box>
       <Box>
         <Typography variant="h4">Messages</Typography>
-        {messages.slice(0, 10).map((message) => (
+        {messages.slice(0, 10).reverse().map((message) => (
           <Box key={message.id}>
-            <Typography variant="body1">{message.user.username}: {message.text}</Typography>
+            <Typography variant="body1">
+              {new Date(message.created_at).toLocaleString('tr-TR', { month: 'short', day: 'numeric', year: 'numeric' })}  {new Date(message.created_at).toLocaleTimeString('tr-TR',{ hour: '2-digit', minute: '2-digit', hour12: false })}  {message.user.name}: {message.text}</Typography>
           </Box>
         ))}
       </Box>
@@ -181,11 +184,17 @@ const RoomsPage: React.FC<RoomsPageProps> = () => {
         <TextField
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              sendMessage();
+            }
+          }}
           variant="outlined"
           placeholder="Type your message..."
           fullWidth
         />
-        <Button variant="contained" onClick={sendMessage}>
+        <Button variant="contained" 
+        onClick={sendMessage}>
           Send
         </Button>
       </Box>
@@ -294,6 +303,167 @@ const RegisterPage: React.FC<RegisterPageProps> = () => {
     </Container>
   );
 };
+interface Branch {
+  id: string;
+  name: string;
+  createdOn: string;
+  email: string;
+  phone: string;
+  fax: string;
+  address: string;
+}
+
+interface BranchProps {
+  branch: Branch;
+}
+const branches: Branch[] = [
+  {
+    id: '1234',
+    name: 'Merkez Şube',
+    createdOn: '20.08.2024',
+    email: 'merkez@company.com',
+    phone: '7777777',
+    fax: '7777777',
+    address: 'Alanya/ANTALYA, Atatürk Caddesi'
+  },
+  {
+    id: '1234',
+    name: 'Merkez Şube',
+    createdOn: '20.08.2024',
+    email: 'merkez@company.com',
+    phone: '7777777',
+    fax: '7777777',
+    address: 'Alanya/ANTALYA, Atatürk Caddesi'
+  },
+  {
+    id: '1234',
+    name: 'Merkez Şube',
+    createdOn: '20.08.2024',
+    email: 'merkez@company.com',
+    phone: '7777777',
+    fax: '7777777',
+    address: 'Alanya/ANTALYA, Atatürk Caddesi'
+  },
+  {
+    id: '1234',
+    name: 'Merkez Şube',
+    createdOn: '20.08.2024',
+    email: 'merkez@company.com',
+    phone: '7777777',
+    fax: '7777777',
+    address: 'Alanya/ANTALYA, Atatürk Caddesi'
+  },
+  {
+    id: '1234',
+    name: 'Merkez Şube',
+    createdOn: '20.08.2024',
+    email: 'merkez@company.com',
+    phone: '7777777',
+    fax: '7777777',
+    address: 'Alanya/ANTALYA, Atatürk Caddesi'
+  },
+  {
+    id: '1234',
+    name: 'Merkez Şube',
+    createdOn: '20.08.2024',
+    email: 'merkez@company.com',
+    phone: '7777777',
+    fax: '7777777',
+    address: 'Alanya/ANTALYA, Atatürk Caddesi'
+  },
+  
+];
+
+const BranchCard: React.FC<BranchProps> = ({ branch }) => {
+  const linkTo = `/branch/${branch.id}`;
+  return (
+    <Link to={linkTo} style={{textDecoration:'none'}}>
+    <Card sx={{maxWidth:300,borderRadius:4}}>
+      <CardContent>
+        <Box display="flex" alignItems="center" mb={2}>
+          <Avatar
+            variant="square"
+            sx={{
+              backgroundColor: randomColor(),
+              
+              width: 55,
+              height: 55,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              borderRadius: 4,
+              mr: 2,
+            }}
+          >
+          <BranchIcon fontSize='large'/>
+            
+          </Avatar>
+          <Box>
+            <Typography variant="h6" gutterBottom>
+              {branch.name}
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Oluşturulma Tarihi: <br/> {branch.createdOn}
+            </Typography>
+          </Box>
+        </Box>
+        <Divider sx={{ mb: 1 }} />
+        <Box display="flex" alignItems="center" mb={1}>
+        <Typography variant="body2" ml={1}>
+            <span style={{color:'black'}}>İletişim No:</span>
+            <span style={{color:'GrayText',marginLeft:10}}>{branch.phone}</span>
+          </Typography>
+        </Box>
+        <Box display="flex" alignItems="center" mb={1}>
+        <Typography variant="body2" ml={1}>
+            <span style={{color:'black'}}>Mail Adresi:</span>
+            <span style={{color:'GrayText',marginLeft:10}}>{branch.email}</span>
+          </Typography>
+        </Box>
+        <Box display="flex" alignItems="center" mb={1}>
+        <Typography variant="body2" ml={1}>
+            <span style={{color:'black'}}>Fax:</span>
+            <span style={{color:'GrayText',marginLeft:10}}>{branch.fax}</span>
+          </Typography>
+        </Box>
+        
+        <Box display="flex" alignItems="center">
+          <Typography variant="body2" ml={1}>
+            <span style={{color:'black'}}>Adres:</span>
+            <span style={{color:'GrayText', marginLeft:10}}>{branch.address}</span>
+          </Typography>
+        </Box>
+      </CardContent>
+    </Card>
+    </Link>
+  );
+};
+
+const BranchList: React.FC = () => {
+ const [branchess, setBranches] = useState<Branch[]>([]);
+ useEffect(() => {
+    //
+   setBranches(branches);
+  }, []);
+
+
+  return (
+    <Grid container spacing={2} margin={2}>
+      {branches.map((branch, index) => (
+        <Grid item xs={12} sm={6} md={4} key={index}>
+          <BranchCard branch={branch} />
+        </Grid>
+      ))}
+    </Grid>
+  );
+};
+
+function randomColor() {
+  let hex = Math.floor(Math.random() * 0xFFFFFF);
+  let color = "#" + hex.toString(16);
+
+  return color;
+}
 
 interface AppProps {}
 
@@ -310,6 +480,8 @@ const AppChat: React.FC<AppProps> = () => {
             element={token ? <RoomsPage /> : <Navigate to="/login"/>}
           />
           <Route path="/register" element={<RegisterPage/>} />
+          <Route path="/branch" element={<BranchList/>} />
+          <Route path="/branch/:id" element={<BranchDetails/>} />
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </Router>
